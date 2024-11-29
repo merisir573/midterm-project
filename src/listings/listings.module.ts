@@ -1,12 +1,15 @@
-// listings.module.ts
 import { Module } from '@nestjs/common';
-import { ListingsController } from './listings.controller';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { ListingsService } from './listings.service';
-import { BookingsModule } from 'src/bookings/bookings.module';
+import { ListingsController } from './listings.controller';
+import { Listing } from './entities/listing.entity';
+import { BookingsService } from '../bookings/bookings.service';
+import { Booking } from '../bookings/entities/booking.entity';
+import { Review } from '../bookings/entities/review.entity';
 
 @Module({
-  imports: [BookingsModule],
+  imports: [TypeOrmModule.forFeature([Listing, Booking, Review])],
   controllers: [ListingsController],
-  providers: [ListingsService],
+  providers: [ListingsService, BookingsService],
 })
 export class ListingsModule {}

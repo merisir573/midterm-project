@@ -1,48 +1,59 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Booking } from './entities/booking.entity';
+import { Review } from './entities/review.entity';
+import { Listing } from '../listings/entities/listing.entity';
 
 @Injectable()
 export class BookingsService {
-  private bookings: any[] = []; // In-memory storage for bookings
-  private reviews: any[] = []; // In-memory storage for reviews
+  constructor(
+    @InjectRepository(Booking)
+    private bookingsRepository: Repository<Booking>,
+    @InjectRepository(Review)
+    private reviewsRepository: Repository<Review>,
+  ) {}
 
-  bookStay(body: { listingId: number; namesOfPeople: string[]; dateFrom: string; dateTo: string }) {
-    const booking = {
-      id: this.bookings.length + 1,
+  async bookStay(body: { listingId: number; namesOfPeople: string[]; dateFrom: string; dateTo: string }) {
+    // Ensure namesOfPeople is stored as a comma-separated string in the database (if required)
+    const namesOfPeople = body.namesOfPeople.join(', ');
+
+    // Create the booking entity
+    const booking = this.bookingsRepository.create({
       listingId: body.listingId,
-      namesOfPeople: body.namesOfPeople,
+      namesOfPeople: namesOfPeople,
       dateFrom: body.dateFrom,
       dateTo: body.dateTo,
-    };
-    this.bookings.push(booking); // Store the booking in memory
+    });
+
+    // Save the booking entity to the database
+    await this.bookingsRepository.save(booking);
 
     return { status: 'Successful', data: booking };
   }
 
-  getBookingsForListing(listingId: number) {
-    // Return all bookings that belong to the given listingId
-    return this.bookings.filter((booking) => booking.listingId === listingId);
+  async getBookingsForListing(listingId: number) {
+    return this.bookingsRepository.find({ where: { listingId } });
   }
 
-  reviewStay(body: { bookingId: number; rating: number; comment: string }) {
-    const booking = this.bookings.find((b) => b.id === body.bookingId);
+  async reviewStay(body: { bookingId: number; rating: number; comment: string }) {
+    const booking = await this.bookingsRepository.findOne({ where: { id: body.bookingId } });
     if (!booking) {
       return { status: 'Error', message: 'Booking not found' };
     }
 
-    const review = {
+    const review = this.reviewsRepository.create({
       bookingId: body.bookingId,
       listingId: booking.listingId,
       rating: body.rating,
       comment: body.comment,
-    };
-
-    this.reviews.push(review); // Store the review in memory
+    });
+    await this.reviewsRepository.save(review);
 
     return { status: 'Successful', data: review };
   }
 
-  getReviewsForListing(listingId: number) {
-    // Return all reviews for the given listingId
-    return this.reviews.filter((review) => review.listingId === listingId);
+  async getReviewsForListing(listingId: number) {
+    return this.reviewsRepository.find({ where: { listingId } });
   }
 }

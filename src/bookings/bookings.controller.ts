@@ -19,7 +19,7 @@ export class BookingsController {
       },
     },
   })
-  bookStay(@Body() body: { listingId: number; namesOfPeople: string[]; dateFrom: string; dateTo: string }) {
+  async bookStay(@Body() body: { listingId: number; namesOfPeople: string[]; dateFrom: string; dateTo: string }) {
     return this.bookingsService.bookStay(body);
   }
 
@@ -34,7 +34,7 @@ export class BookingsController {
       },
     },
   })
-  reviewStay(@Body() body: { bookingId: number; rating: number; comment: string }) {
+  async reviewStay(@Body() body: { bookingId: number; rating: number; comment: string }) {
     return this.bookingsService.reviewStay(body);
   }
 }

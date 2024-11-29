@@ -3,7 +3,7 @@ import { ListingsService } from './listings.service';
 import { ApiTags, ApiBody, ApiQuery } from '@nestjs/swagger';
 
 @ApiTags('Listings')
-@Controller({ path: 'listings', version: '1' }) 
+@Controller({ path: 'listings', version: '1' })
 export class ListingsController {
   constructor(private readonly listingsService: ListingsService) {}
 
@@ -19,8 +19,8 @@ export class ListingsController {
       },
     },
   })
-  insertListing(@Body() body: { noOfPeople: number; country: string; city: string; price: number }) {
-    return this.listingsService.insertListing(body);
+  async insertListing(@Body() body: { noOfPeople: number; country: string; city: string; price: number }) {
+    return await this.listingsService.insertListing(body);
   }
 
   @Get('query')
@@ -29,19 +29,19 @@ export class ListingsController {
   @ApiQuery({ name: 'noOfPeople', type: 'number', required: false, description: 'Filter by number of people' })
   @ApiQuery({ name: 'dateFrom', type: 'string', required: false, description: 'Start date of availability', format: 'date' })
   @ApiQuery({ name: 'dateTo', type: 'string', required: false, description: 'End date of availability', format: 'date' })
-  queryListings(@Query() query: { country: string; city: string; noOfPeople: number; dateFrom: string; dateTo: string }) {
-    return this.listingsService.queryListings(query);
+  async queryListings(@Query() query: { country: string; city: string; noOfPeople: number; dateFrom: string; dateTo: string }) {
+    return await this.listingsService.queryListings(query);
   }
 
   @Get('report-by-rating')
   @ApiQuery({ name: 'country', type: 'string', required: true, description: 'Country to filter by' })
   @ApiQuery({ name: 'city', type: 'string', required: false, description: 'City to filter by' })
   @ApiQuery({ name: 'rating', type: 'number', required: true, description: 'Minimum rating to filter by' })
-  queryListingsByRating(
+  async queryListingsByRating(
     @Query('country') country: string,
     @Query('city') city: string,
     @Query('rating') rating: number,
   ) {
-    return this.listingsService.queryListingsByRating({ country, city, rating: +rating });
+    return await this.listingsService.queryListingsByRating({ country, city, rating: +rating });
   }
 }
